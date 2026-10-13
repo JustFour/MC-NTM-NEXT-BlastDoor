@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -25,24 +26,36 @@ import org.jspecify.annotations.Nullable;
  * +Z — вдоль пути (куда смотрел игрок), +X — поперёк пути, влево от игрока.
  * Створка занимает x ∈ [-1.5; 1.5], y ∈ [0; 3] и при открытии уезжает на 3 блока вдоль X.</p>
  *
- * <p>Текстура {@code textures/entity/blast_door.png} 64x64:
- * лицевая сторона створки — (0,0)-(48,48), образцы материалов — столбец 48..64.</p>
+ * <p>Текстура {@code textures/entity/blast_door.png} 256x256, 32 текселя на блок: лицевая сторона
+ * створки — (0,0)-(96,92), предупреждающая полоса — (0,96)-(88,104), полки рамы с заклёпками —
+ * (0,108)-(96,112) и (100,0)-(104,96), образцы материалов 32x32 — от (128,0).</p>
  */
 public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEntity, BlastDoorRenderState> {
     public static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(BlastDoorMod.MODID, "textures/entity/blast_door.png");
 
-    private static final float TEX = 64.0F;
+    private static final float TEX = 256.0F;
 
-    // Области текстуры в пикселях: u0, v0, u1, v1
-    private static final float[] FACE = {0, 0, 48, 46};
-    private static final float[] PAINT = {48, 0, 64, 16};
-    private static final float[] STEEL = {48, 16, 64, 32};
-    private static final float[] BRASS = {48, 32, 64, 48};
-    private static final float[] RUBBER = {48, 48, 64, 64};
-    private static final float[] HAZARD = {0, 48, 44, 52};
+    // Области текстуры в текселях: u0, v0, u1, v1
+    private static final float[] FACE = {0, 0, 96, 92};
+    private static final float[] HAZARD = {0, 96, 88, 104};
+    /** Полки рамы и рёбер с рядом заклёпок: горизонтальная (88x4) и вертикальная (4x92). */
+    private static final float[] FLANGE_H = {0, 108, 88, 112};
+    private static final float[] FLANGE_V = {100, 0, 104, 92};
+    private static final float[] PAINT = {128, 0, 160, 32};
+    private static final float[] STEEL = {160, 0, 192, 32};
+    private static final float[] BRASS = {192, 0, 224, 32};
+    private static final float[] RUBBER = {224, 0, 256, 32};
+    private static final float[] LAMP_OFF = {128, 32, 160, 64};
+    private static final float[] LAMP_ON = {160, 32, 192, 64};
+    private static final float[] DARK = {192, 32, 224, 64};
 
     private static final float P = 1.0F / 16.0F; // один пиксель в блоках
+
+    /** Сколькими прямыми сегментами набран обод штурвала. */
+    private static final int WHEEL_SEGMENTS = 16;
+    /** На сколько градусов поворачивается штурвал, пока отходят ригели. */
+    private static final float WHEEL_TURN = 270.0F;
 
     public BlastDoorRenderer(BlockEntityRendererProvider.Context context) {}
 
@@ -58,6 +71,8 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
         state.facing = be.getBlockState().getValue(BlastDoorBlock.FACING);
         state.mirrored = be.getBlockState().getValue(BlastDoorBlock.MIRRORED);
         state.progress = be.getRenderProgress(partialTick);
+        boolean moving = state.progress > 0.001F && state.progress < 0.999F;
+        state.lampsLit = moving && be.getLevel() != null && (be.getLevel().getGameTime() / 5) % 2 == 0;
     }
 
     @Override
@@ -68,6 +83,7 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
         final float slide = dir * 3.0F * eased;
         final float bolts = 1.0F - Mth.clamp(p * 8.0F, 0.0F, 1.0F); // ригели прячутся в начале хода
         final int light = state.lightCoords;
+        final boolean lampsLit = state.lampsLit;
 
         poseStack.pushPose();
         poseStack.translate(0.5F, 0.0F, 0.5F);
@@ -76,7 +92,7 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
         collector.submitCustomGeometry(poseStack, RenderTypes.entitySolid(TEXTURE), (pose, vc) -> {
             BoxMesh m = new BoxMesh(pose, vc, light, TEX);
             drawGuideRail(m, dir);
-            drawLeaf(m, slide, dir, bolts);
+            drawLeaf(m, slide, dir, bolts, lampsLit);
         });
 
         poseStack.popPose();
@@ -89,38 +105,44 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
         m.box(a, 0.0F, -1.5F * P, b, 0.04F, 1.5F * P, STEEL, null);
     }
 
-    private static void drawLeaf(BoxMesh m, float sx, float dir, float bolts) {
+    private static void drawLeaf(BoxMesh m, float sx, float dir, float bolts, boolean lampsLit) {
         final float bottom = 2 * P;
         final float top = 3.0F;
         final float half = 5 * P;      // полутолщина основного листа (10 px)
         final float rim = 8 * P;       // до этой глубины — рамка и рёбра (16 px, как коллизия);
-                                       // штурвал и вентили выступают на 3 px и остаются внутри блока
+                                       // штурвал и лампы выступают на 3 px и остаются внутри блока
 
         // Основной лист
         m.box(sx - 1.5F, bottom, -half, sx + 1.5F, top, half, PAINT, FACE);
+
+        // Горящая лампа не зависит от освещения вокруг.
+        final BoxMesh glow = lampsLit ? m.withLight(LightCoordsUtil.FULL_BRIGHT) : m;
+        final float[] lens = lampsLit ? LAMP_ON : LAMP_OFF;
+        // Штурвал поворачивается, пока отходят ригели.
+        final float wheelTurn = (1.0F - bolts) * WHEEL_TURN;
 
         for (int s = -1; s <= 1; s += 2) {
             float z0 = s > 0 ? half : -rim;
             float z1 = s > 0 ? rim : -half;
 
             // Рамка по периметру (2 px)
-            m.box(sx - 1.5F, bottom, z0, sx - 1.5F + 2 * P, top, z1, PAINT, null);
-            m.box(sx + 1.5F - 2 * P, bottom, z0, sx + 1.5F, top, z1, PAINT, null);
-            m.box(sx - 1.5F + 2 * P, top - 2 * P, z0, sx + 1.5F - 2 * P, top, z1, PAINT, null);
-            m.box(sx - 1.5F + 2 * P, bottom, z0, sx + 1.5F - 2 * P, bottom + 2 * P, z1, PAINT, null);
+            m.box(sx - 1.5F, bottom, z0, sx - 1.5F + 2 * P, top, z1, PAINT, FLANGE_V);
+            m.box(sx + 1.5F - 2 * P, bottom, z0, sx + 1.5F, top, z1, PAINT, FLANGE_V);
+            m.box(sx - 1.5F + 2 * P, top - 2 * P, z0, sx + 1.5F - 2 * P, top, z1, PAINT, FLANGE_H);
+            m.box(sx - 1.5F + 2 * P, bottom, z0, sx + 1.5F - 2 * P, bottom + 2 * P, z1, PAINT, FLANGE_H);
 
             // Горизонтальные рёбра жёсткости
-            m.box(sx - 1.5F + 2 * P, 1.0F - P, z0, sx + 1.5F - 2 * P, 1.0F + P, z1, PAINT, null);
-            m.box(sx - 1.5F + 2 * P, 2.0F - P, z0, sx + 1.5F - 2 * P, 2.0F + P, z1, PAINT, null);
+            m.box(sx - 1.5F + 2 * P, 1.0F - P, z0, sx + 1.5F - 2 * P, 1.0F + P, z1, PAINT, FLANGE_H);
+            m.box(sx - 1.5F + 2 * P, 2.0F - P, z0, sx + 1.5F - 2 * P, 2.0F + P, z1, PAINT, FLANGE_H);
 
             // Предупреждающая полоса внизу
             float hz0 = s > 0 ? half : -half - 0.5F * P;
             float hz1 = s > 0 ? half + 0.5F * P : -half;
             m.box(sx - 1.5F + 2 * P, bottom + 2 * P, hz0, sx + 1.5F - 2 * P, bottom + 6 * P, hz1, HAZARD, HAZARD);
 
-            drawHandwheel(m, sx, 1.5F, s, half);
-            drawValve(m, sx - 0.85F, 2.45F, s, half);
-            drawValve(m, sx + 0.85F, 2.45F, s, half);
+            drawHandwheel(m, sx, 1.5F, s, half, wheelTurn);
+            drawLamp(m, glow, lens, sx - 0.85F, 2.45F, s, half);
+            drawLamp(m, glow, lens, sx + 0.85F, 2.45F, s, half);
         }
 
         // Ригели на набегающей кромке (входят в косяк, когда дверь закрыта)
@@ -152,10 +174,19 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
         return new float[]{Math.min(z0, z1), Math.max(z0, z1)};
     }
 
-    /** Штурвал задрайки: шток от поверхности листа, обод и крестовина над рёбрами. */
-    private static void drawHandwheel(BoxMesh m, float cx, float cy, int s, float half) {
-        float r = 5 * P;      // внешний радиус обода
-        float t = 1 * P;      // толщина обода
+    /**
+     * Штурвал задрайки: шайба и шток от поверхности листа, круглый обод из прямых сегментов,
+     * шесть спиц и ступица. Обе стороны сидят на одном валу и поворачиваются вместе.
+     *
+     * @param turn угол поворота штурвала в градусах
+     */
+    private static void drawHandwheel(BoxMesh m, float cx, float cy, int s, float half, float turn) {
+        final float r = 5 * P;      // внешний радиус обода
+        final float t = 1 * P;      // толщина обода
+        final float hub = 1.25F * P;
+        // Соседние детали штурвала перекрываются; чтобы их грани не совпадали и не мерцали,
+        // каждая вторая утоплена на волосок.
+        final float inset = 0.002F;
 
         // Опорная шайба и шток — вплотную к листу
         float[] base = depth(s, half, 0, 0.5F);
@@ -163,22 +194,30 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
         float[] stem = depth(s, half, 0.5F, 2);
         m.box(cx - P, cy - P, stem[0], cx + P, cy + P, stem[1], STEEL, STEEL);
 
-        // Обод и спицы
         float[] w = depth(s, half, 2, 3);
-        m.box(cx - r, cy + r - t, w[0], cx + r, cy + r, w[1], BRASS, BRASS);
-        m.box(cx - r, cy - r, w[0], cx + r, cy - r + t, w[1], BRASS, BRASS);
-        m.box(cx - r, cy - r + t, w[0], cx - r + t, cy + r - t, w[1], BRASS, BRASS);
-        m.box(cx + r - t, cy - r + t, w[0], cx + r, cy + r - t, w[1], BRASS, BRASS);
-        m.box(cx - r + t, cy - 0.5F * P, w[0], cx + r - t, cy + 0.5F * P, w[1], STEEL, STEEL);
-        m.box(cx - 0.5F * P, cy - r + t, w[0], cx + 0.5F * P, cy + r - t, w[1], STEEL, STEEL);
+        BoxMesh wheel = m.translated(cx, cy, 0.0F).rotatedZ(turn);
+
+        // Обод: сегменты по касательной, длиной в хорду внешнего радиуса
+        final float chord = (float) (2 * r * Math.tan(Math.PI / WHEEL_SEGMENTS));
+        for (int i = 0; i < WHEEL_SEGMENTS; i++) {
+            float d = (i % 2) * inset;
+            wheel.rotatedZ(i * 360.0F / WHEEL_SEGMENTS)
+                    .box(r - t, -chord / 2, w[0] + d, r, chord / 2, w[1] - d, BRASS, BRASS);
+        }
+        // Спицы от ступицы к ободу
+        for (int i = 0; i < 6; i++) {
+            wheel.rotatedZ(i * 60.0F)
+                    .box(hub, -0.4F * P, w[0] + 2 * inset, r - 0.5F * t, 0.4F * P, w[1] - 2 * inset, STEEL, STEEL);
+        }
+        wheel.box(-hub, -hub, w[0], hub, hub, w[1], STEEL, STEEL);
     }
 
-    /** Небольшой вентиль (как на фото — справа вверху): корпус на листе и латунный маховичок. */
-    private static void drawValve(BoxMesh m, float cx, float cy, int s, float half) {
+    /** Сигнальная лампа: тёмный корпус на листе и янтарная линза. Мигает, пока створка движется. */
+    private static void drawLamp(BoxMesh m, BoxMesh glow, float[] lens, float cx, float cy, int s, float half) {
         float[] body = depth(s, half, 0, 2);
-        m.box(cx - 2 * P, cy - 2 * P, body[0], cx + 2 * P, cy + 2 * P, body[1], STEEL, STEEL);
+        m.box(cx - 2 * P, cy - 2 * P, body[0], cx + 2 * P, cy + 2 * P, body[1], DARK, DARK);
         float[] cap = depth(s, half, 2, 3);
-        m.box(cx - 1 * P, cy - 1 * P, cap[0], cx + 1 * P, cy + 1 * P, cap[1], BRASS, BRASS);
+        glow.box(cx - 1.25F * P, cy - 1.25F * P, cap[0], cx + 1.25F * P, cy + 1.25F * P, cap[1], lens, lens);
     }
 
     @Override

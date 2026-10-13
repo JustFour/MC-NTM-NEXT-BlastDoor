@@ -9,4 +9,6 @@ public class BlastDoorRenderState extends BlockEntityRenderState {
     public boolean mirrored;
     /** 0 — закрыта, 1 — открыта; уже интерполировано по partialTick. */
     public float progress;
+    /** Сигнальные лампы на створке сейчас горят: они мигают, пока створка движется. */
+    public boolean lampsLit;
 }

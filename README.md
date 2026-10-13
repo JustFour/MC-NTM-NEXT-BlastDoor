@@ -30,7 +30,9 @@ blocks the track.
 
 Behaviour:
 
-- The leaf takes 6 seconds to travel, with eased start and stop, sounds and animated locking bolts.
+- The leaf takes 6 seconds to travel, with eased start and stop and sounds.
+- Moving parts besides the leaf: locking bolts that pull in before it moves, the round handwheel in the
+  centre that turns with them, and two warning lamps on each side that blink while the leaf moves.
 - The opening loses its collision when the leaf is about **halfway** open and gets it back at the same point on the way back.
 - The door never crushes anyone: while a minecart, player or mob is in the doorway it neither starts to close nor restores the collision — it waits.
 - A closed door stops minecarts (collision plus a server-side safeguard), and mobs do not path through it.
@@ -142,7 +144,7 @@ You need **JDK 25** (Mojang ships Java 25 with 26.2).
 
 ```bash
 ./gradlew runClient     # start the game with the mod
-./gradlew build         # build the jar → build/libs/blastdoor-1.7.3.jar
+./gradlew build         # build the jar → build/libs/blastdoor-1.7.4.jar
 ```
 
 On Windows use `gradlew.bat`. Put the built jar into the `mods` folder of a NeoForge 26.2 client.
@@ -166,7 +168,7 @@ https://projects.neoforged.net/neoforged/neoforge.
 | `block/BlastDoorPartBlock.java` | Invisible parts of the 3×3 frame: collision, redstone input, removal of the whole structure |
 | `block/DoorGeometry.java` | Part positions, collision shapes, doorway volume |
 | `blockentity/BlastDoorBlockEntity.java` | The 3×3 structure and the "doorway is clear" check |
-| `client/BlastDoorRenderer.java` | Draws the leaf (sheet, frame, ribs, handwheel, valves, bolts, rollers) and the guide rail |
+| `client/BlastDoorRenderer.java` | Draws the leaf (sheet, riveted frame and ribs, round handwheel, warning lamps, bolts, rollers) and the guide rail |
 | **Railway Side Blast Door** | |
 | `block/SideDoorBlock.java` | Controller: the rail plus the list of opening and niche parts |
 | `block/SideDoorPartBlock.java` | Invisible opening and niche parts: collision, redstone input, removal of the whole structure |
