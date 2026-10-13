@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "blastdoor:item/side_blast_door"
+  }
+}

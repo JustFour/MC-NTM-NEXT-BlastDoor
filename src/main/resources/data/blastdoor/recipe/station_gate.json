@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:mod_loaded",
+        "modid": "hbm"
+      }
+    }
+  ],
+  "category": "redstone",
+  "key": {
+    "I": "minecraft:iron_block",
+    "O": "minecraft:obsidian",
+    "P": "minecraft:piston"
+  },
+  "pattern": [
+    "III",
+    "III",
+    "POP"
+  ],
+  "result": {
+    "id": "blastdoor:station_gate"
+  }
+}

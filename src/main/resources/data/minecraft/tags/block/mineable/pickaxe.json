@@ -1,3 +1,10 @@
 {
-  "values": ["blastdoor:blast_door", "blastdoor:blast_door_part"]
+  "values": [
+    "blastdoor:blast_door",
+    "blastdoor:blast_door_part",
+    "blastdoor:side_blast_door",
+    "blastdoor:side_blast_door_part",
+    "blastdoor:station_gate",
+    "blastdoor:station_gate_part"
+  ]
 }

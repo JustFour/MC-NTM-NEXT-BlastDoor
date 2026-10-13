@@ -4,7 +4,6 @@ import com.blastdoor.BlastDoorMod;
 import com.blastdoor.block.BlastDoorBlock;
 import com.blastdoor.blockentity.BlastDoorBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -12,7 +11,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -76,7 +74,7 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
         poseStack.mulPose(Axis.YP.rotationDegrees(-state.facing.toYRot()));
 
         collector.submitCustomGeometry(poseStack, RenderTypes.entitySolid(TEXTURE), (pose, vc) -> {
-            Mesh m = new Mesh(pose, vc, light);
+            BoxMesh m = new BoxMesh(pose, vc, light, TEX);
             drawGuideRail(m, dir);
             drawLeaf(m, slide, dir, bolts);
         });
@@ -85,13 +83,13 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
     }
 
     /** Неподвижная направляющая в полу: под проёмом и под «карманом», куда уезжает створка. */
-    private static void drawGuideRail(Mesh m, float dir) {
+    private static void drawGuideRail(BoxMesh m, float dir) {
         float a = dir > 0 ? -1.5F : -4.5F;
         float b = dir > 0 ? 4.5F : 1.5F;
         m.box(a, 0.0F, -1.5F * P, b, 0.04F, 1.5F * P, STEEL, null);
     }
 
-    private static void drawLeaf(Mesh m, float sx, float dir, float bolts) {
+    private static void drawLeaf(BoxMesh m, float sx, float dir, float bolts) {
         final float bottom = 2 * P;
         final float top = 3.0F;
         final float half = 5 * P;      // полутолщина основного листа (10 px)
@@ -155,7 +153,7 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
     }
 
     /** Штурвал задрайки: шток от поверхности листа, обод и крестовина над рёбрами. */
-    private static void drawHandwheel(Mesh m, float cx, float cy, int s, float half) {
+    private static void drawHandwheel(BoxMesh m, float cx, float cy, int s, float half) {
         float r = 5 * P;      // внешний радиус обода
         float t = 1 * P;      // толщина обода
 
@@ -176,7 +174,7 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
     }
 
     /** Небольшой вентиль (как на фото — справа вверху): корпус на листе и латунный маховичок. */
-    private static void drawValve(Mesh m, float cx, float cy, int s, float half) {
+    private static void drawValve(BoxMesh m, float cx, float cy, int s, float half) {
         float[] body = depth(s, half, 0, 2);
         m.box(cx - 2 * P, cy - 2 * P, body[0], cx + 2 * P, cy + 2 * P, body[1], STEEL, STEEL);
         float[] cap = depth(s, half, 2, 3);
@@ -188,51 +186,5 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
         BlockPos pos = be.getBlockPos();
         return new AABB(pos.getX() - 4.5, pos.getY(), pos.getZ() - 4.5,
                 pos.getX() + 5.5, pos.getY() + 3.25, pos.getZ() + 5.5);
-    }
-
-    // ---------------------------------------------------------------- построение коробок
-
-    /** Мини-построитель параллелепипедов с текстурой и нормалями. */
-    private record Mesh(PoseStack.Pose pose, VertexConsumer vc, int light) {
-
-        /**
-         * @param side  область текстуры для боковых граней (±X, ±Y)
-         * @param front область для граней ±Z (лицевые стороны); null — как у боковых
-         */
-        void box(float x0, float y0, float z0, float x1, float y1, float z1, float[] side, float @Nullable [] front) {
-            float[] f = front != null ? front : side;
-            // -Z
-            quad(x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0, f, 0, 0, -1);
-            // +Z
-            quad(x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1, f, 0, 0, 1);
-            // -X
-            quad(x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0, side, -1, 0, 0);
-            // +X
-            quad(x1, y0, z1, x1, y0, z0, x1, y1, z0, x1, y1, z1, side, 1, 0, 0);
-            // -Y
-            quad(x0, y0, z0, x1, y0, z0, x1, y0, z1, x0, y0, z1, side, 0, -1, 0);
-            // +Y
-            quad(x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0, side, 0, 1, 0);
-        }
-
-        /** Вершины: низ-лево, низ-право, верх-право, верх-лево (если смотреть на грань снаружи). */
-        private void quad(float ax, float ay, float az, float bx, float by, float bz,
-                          float cx, float cy, float cz, float dx, float dy, float dz,
-                          float[] uv, float nx, float ny, float nz) {
-            float u0 = uv[0] / TEX, v0 = uv[1] / TEX, u1 = uv[2] / TEX, v1 = uv[3] / TEX;
-            vertex(ax, ay, az, u0, v1, nx, ny, nz);
-            vertex(bx, by, bz, u1, v1, nx, ny, nz);
-            vertex(cx, cy, cz, u1, v0, nx, ny, nz);
-            vertex(dx, dy, dz, u0, v0, nx, ny, nz);
-        }
-
-        private void vertex(float x, float y, float z, float u, float v, float nx, float ny, float nz) {
-            vc.addVertex(pose, x, y, z)
-                    .setColor(255, 255, 255, 255)
-                    .setUv(u, v)
-                    .setOverlay(OverlayTexture.NO_OVERLAY)
-                    .setLight(light)
-                    .setNormal(pose, nx, ny, nz);
-        }
     }
 }

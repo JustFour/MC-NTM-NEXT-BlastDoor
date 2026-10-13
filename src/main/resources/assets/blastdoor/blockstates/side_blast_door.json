@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "blastdoor:block/blast_door" },
+    "facing=south": { "model": "blastdoor:block/blast_door" },
+    "facing=east":  { "model": "blastdoor:block/blast_door", "y": 90 },
+    "facing=west":  { "model": "blastdoor:block/blast_door", "y": 90 }
+  }
+}

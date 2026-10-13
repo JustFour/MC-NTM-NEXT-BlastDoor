@@ -40,7 +40,7 @@ displayName="${mod_name}" #mandatory
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-Blast door 3x3 with a rail: slides aside on a redstone signal and blocks minecarts when closed.
+Blast doors for metro tunnels and bunkers: a 3x3 sliding door and a 3x3 swing door on rails, and 4x4 station air-tight gates that lie in the floor when open.
 '''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.

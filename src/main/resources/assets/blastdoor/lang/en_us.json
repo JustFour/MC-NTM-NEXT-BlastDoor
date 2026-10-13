@@ -1,5 +1,11 @@
 {
-  "block.blastdoor.blast_door": "Blast Door",
-  "block.blastdoor.blast_door_part": "Blast Door",
+  "block.blastdoor.blast_door": "Railway Slide Blast Door",
+  "block.blastdoor.blast_door_part": "Railway Slide Blast Door",
+  "block.blastdoor.side_blast_door": "Railway Side Blast Door",
+  "block.blastdoor.side_blast_door_part": "Railway Side Blast Door",
+  "block.blastdoor.station_gate": "Station Air-Tight Gates",
+  "block.blastdoor.station_gate_part": "Station Air-Tight Gates",
+  "message.blastdoor.side_blast_door.no_space": "Needs a free 3x3 opening and a free niche beside it: 1 block wide, 3 blocks long, 3 blocks high",
+  "message.blastdoor.station_gate.no_space": "Needs a free 4x4 opening and a free 4x4 pit, one block deep, in the floor under and beyond it",
   "tooltip.blastdoor.blast_resistance": "Blast Resistance: %s"
 }

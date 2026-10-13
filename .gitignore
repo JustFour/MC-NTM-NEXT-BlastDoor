@@ -42,3 +42,6 @@ run/
 **/src/generated/**/.cache/
 repo/
 !**/src/**/repo/
+
+### Logs written when game classes run outside the game ###
+logs/

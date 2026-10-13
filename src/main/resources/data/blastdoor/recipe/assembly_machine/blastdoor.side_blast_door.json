@@ -1,0 +1,39 @@
+{
+  "type": "hbm:assembly_machine",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "hbm"
+    }
+  ],
+  "duration": 200,
+  "input_items": [
+    {
+      "count": 18,
+      "ingredient": "#c:plates/steel"
+    },
+    {
+      "count": 6,
+      "ingredient": "#c:plates/lead"
+    },
+    {
+      "count": 4,
+      "ingredient": "#hbm:ingots/any_rubber"
+    },
+    {
+      "count": 8,
+      "ingredient": "#c:bolts/dura_steel"
+    },
+    {
+      "ingredient": "hbm:motor"
+    },
+    {
+      "ingredient": "minecraft:rail"
+    }
+  ],
+  "order": 16387,
+  "output_items": [
+    "blastdoor:side_blast_door"
+  ],
+  "power": 100
+}
