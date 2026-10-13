@@ -15,6 +15,8 @@ whole structure and drops a single item. The items are in the Redstone Blocks ta
 
 ## Railway Slide Blast Door (3×3, on rails)
 
+![Railway Slide Blast Door](docs/screenshots/railway-slide-blast-door.png)
+
 On a redstone signal the leaf slides 3 blocks sideways; when the signal is gone it slides back and
 blocks the track.
 
@@ -38,6 +40,8 @@ there, the door visually disappears into it, as in a real tunnel. The guide rail
 drawn under both the opening and the pocket.
 
 ## Railway Side Blast Door (3×3, on rails)
+
+![Railway Side Blast Door](docs/screenshots/railway-side-blast-door.png)
 
 A swing door: the leaf hangs on vertical hinges at the edge of the opening. Closed, it stands across
 the track; open, it stands along the track in a niche beside it, like the tunnel doors of the metro.
@@ -72,6 +76,8 @@ Behaviour:
 - If there is no room, the game tells you what is needed instead of placing the door.
 
 ## Station Air-Tight Gates (4×4)
+
+![Station Air-Tight Gates](docs/screenshots/station-air-tight-gates.png)
 
 A slab one block thick, hinged at floor level. With a redstone signal it lies in the floor and you
 walk over it; without a signal it stands upright and seals a 4×4 opening.
