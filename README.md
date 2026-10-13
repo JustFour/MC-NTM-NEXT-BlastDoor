@@ -9,102 +9,55 @@ Heavy doors for metro tunnels and bunkers, driven by redstone:
 - **Station Air-Tight Gates** — a 4×4 slab that lies in the floor as part of it and swings up to seal a
   passage, like the gates at deep metro stations.
 
-All of them have the same stats: they need a diamond pickaxe or better, are twice as hard as obsidian, have a
-blast resistance of 450 and cannot be pushed by pistons. Breaking any block of a door dismantles the
-whole structure and drops a single item. The items are in the Redstone Blocks tab.
+All doors follow the same rules. A redstone signal on any block of a door opens it; no signal closes
+it. The opening becomes passable about halfway through the travel, and a door waits rather than crush
+whoever is in its way. They need a diamond pickaxe or better, are twice as hard as obsidian, have a
+blast resistance of 450 and cannot be pushed by pistons. Breaking any block drops the whole door as
+one item. The items are in the Redstone Blocks tab.
 
 ## Railway Slide Blast Door (3×3, on rails)
 
 ![Railway Slide Blast Door](docs/screenshots/railway-slide-blast-door.png)
 
-On a redstone signal the leaf slides 3 blocks sideways; when the signal is gone it slides back and
-blocks the track.
+The leaf slides 3 blocks sideways in 6 seconds. Closed, it blocks the track and stops minecarts.
 
-1. Lay your rails and stand on the track **facing along the rails**.
-2. Place the Railway Slide Blast Door **in place of a rail** where the door should be. The block is itself a straight
-   rail and sits at the bottom centre of the opening; the other 8 blocks of the 3×3 frame are placed
-   automatically. The 3×3 area across the track must be free.
-3. Power **any** of the door's 9 blocks with redstone (a lever on the wall next to it, a button,
-   a repeater and so on). Signal on — the door is open; signal off — it is closed.
-4. **Hold Shift while placing** to make the leaf slide the other way.
+1. Stand on the track **facing along the rails** and place the door **in place of a rail**.
+   The 3×3 area across the track must be free.
+2. **Hold Shift while placing** to make the leaf slide the other way.
 
-Behaviour:
-
-- The leaf takes 6 seconds to travel, with eased start and stop and sounds.
-- Moving parts besides the leaf: locking bolts that pull in before it moves, the round handwheel in the
-  centre that turns with them, and two warning lamps on each side that blink while the leaf moves.
-- The opening loses its collision when the leaf is about **halfway** open and gets it back at the same point on the way back.
-- The door never crushes anyone: while a minecart, player or mob is in the doorway it neither starts to close nor restores the collision — it waits.
-- A closed door stops minecarts (collision plus a server-side safeguard), and mobs do not path through it.
-
-Building tip: the leaf slides sideways into a 3×3 "pocket" next to the opening. If there is a wall
-there, the door visually disappears into it, as in a real tunnel. The guide rail in the floor is
-drawn under both the opening and the pocket.
+The leaf slides into a 3×3 "pocket" beside the opening; if there is a wall there, the door
+disappears into it. The locking bolts, the handwheel and the warning lamps are animated.
 
 ## Railway Side Blast Door (3×3, on rails)
 
 ![Railway Side Blast Door](docs/screenshots/railway-side-blast-door.png)
 
-A swing door: the leaf hangs on vertical hinges at the edge of the opening. Closed, it stands across
-the track; open, it stands along the track in a niche beside it, like the tunnel doors of the metro.
+A swing door: in about 7 seconds the leaf turns on vertical hinges from across the track into a
+niche beside it. A hydraulic cylinder on the back pushes it shut. Closed, it stops minecarts.
 
-1. Next to the track, make a niche for the open leaf: 1 block wide, 3 blocks long and 3 blocks high.
-   It starts in line with the door and runs along the track away from you, right beyond the edge of
-   the 3×3 opening — by default on your **left**.
-2. Stand on the track **facing along the rails** and place the door **in place of a rail**, as with the
-   sliding door. The 3×3 area across the track and the niche must be free.
-3. Power **any** of the 18 blocks with redstone. Signal on — the leaf swings into the niche; signal
-   off — it swings back across the track.
-4. **Hold Shift while placing** to put the niche on your right.
+1. Beside the track make a niche for the open leaf: 1 block wide, 3 long, 3 high. It starts in line
+   with the door and runs along the track away from you — on your **left**, or on your right if you
+   **hold Shift** while placing.
+2. Stand on the track **facing along the rails** and place the door **in place of a rail**. The 3×3
+   area across the track and the niche must be free; if they are not, the game tells you.
 
-Behaviour:
-
-- The leaf takes about 7 seconds to swing, away from you as you placed it.
-- Both sides are built from the same oxide-brown sheet steel with riveted frames and belts at the same
-  heights, so they read as one door. The front (it faces you when the door is closed, and the track when
-  it is open) is shallow and carries the lock drive and a grab rail; the back has deep beams.
-- The door is moved by a heavy hydraulic cylinder on the back side. Its mount stands in the corner of
-  the niche; the cylinder swings on it and pushes the rod out as the door closes, and lies folded
-  between two beams when the door is open.
-- Other moving parts: locking bolts on the free edge that pull in before the leaf moves, a drive rod
-  and two vertical locking rods that shift with them, and warning lamps on both sides that blink
-  while the leaf moves.
-- The opening loses its collision at about **halfway**; the leaf becomes solid in the niche only once
-  it has swung in completely. Anything standing in the niche at that moment is pushed out towards the track.
-- The door never crushes anyone: while somebody is in the opening or in the two blocks in front of it
-  on the swing side, it neither leaves the niche nor closes the opening — it waits. Opening does not
-  wait, so a minecart parked right in front of the door on that side will be swept through visually.
-- A closed door stops minecarts, like the sliding one.
-- If there is no room, the game tells you what is needed instead of placing the door.
+The door waits to close while anyone is in the opening or within two blocks in front of it on the
+niche side. Opening does not wait, so the leaf passes visually through a minecart parked at the door.
 
 ## Station Air-Tight Gates (4×4)
 
 ![Station Air-Tight Gates](docs/screenshots/station-air-tight-gates.png)
 
-A slab one block thick, hinged at floor level. With a redstone signal it lies in the floor and you
-walk over it; without a signal it stands upright and seals a 4×4 opening.
+A slab hinged at floor level. With a signal it lies in the floor and you walk over it; without one
+it rises in about 10 seconds and seals a 4×4 opening.
 
-1. Dig a pit in the floor: 4 blocks wide, 4 blocks long and 1 block deep. Its first row goes right
-   under the opening, the other three continue behind it. The 4×4 opening above the first row must be free.
+1. Dig a pit 4 blocks wide, 4 long and 1 deep: the first row right under the opening, the rest behind it.
 2. Stand in front of the opening **facing it** and place the gates into the **nearest row** of the pit.
-   The structure takes 1 block to the right of the block you placed and 2 blocks to the left.
-3. Power **any** of the 32 blocks with redstone. Signal on — the slab lies down and becomes the floor;
-   signal off — it rises and closes the opening.
+   They take 1 block to the right of that block and 2 to the left; if there is no room, the game tells you.
 
-Behaviour:
-
-- The slab takes about 10 seconds to swing.
-- Lying down, it is level with the surrounding floor. Its top is a grey deck in a tread-plate frame;
-  the underside, which faces away from you when the gates are closed, is an oxide-red riveted frame
-  with braces and chamfered top corners, as on the real gates.
-- Moving parts besides the slab itself: two hydraulic cylinders that swing on their mounts and extend
-  as the slab rises; a service platform whose deck stays level while its railing folds flat against
-  the slab; warning lamps in the pit that blink while the slab moves.
-- The opening becomes passable when the slab is about **halfway** down. The slab turns into a solid floor only once it has lain down completely; until then there is a pit under it.
-- It never crushes anyone: while somebody is standing on it or in the opening it neither starts to rise nor closes the opening again — it waits.
-- While the gates are closed, a pit one block deep is left where the slab was. Whatever is in the pit
-  when the slab comes back down ends up on top of it, not inside.
-- If there is no room, the game tells you what is needed instead of placing the gates.
+The slab becomes a solid floor only once it has fully lain down; until then, and while the gates are
+closed, there is a pit in its place. Whatever is in the pit when the slab comes down ends up on top
+of it. The hydraulic cylinders, a folding service platform and the warning lamps in the pit are animated.
 
 ## Crafting
 
