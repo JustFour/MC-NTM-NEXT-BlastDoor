@@ -1,0 +1,5 @@
+{
+  "block.blastdoor.blast_door": "Blast Door",
+  "block.blastdoor.blast_door_part": "Blast Door",
+  "tooltip.blastdoor.blast_resistance": "Blast Resistance: %s"
+}
