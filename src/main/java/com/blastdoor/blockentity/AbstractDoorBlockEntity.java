@@ -4,8 +4,6 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -15,7 +13,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -32,7 +29,7 @@ import org.jspecify.annotations.Nullable;
  * <p>Створка никого не «прищемит»: она не трогается из открытого положения и не возвращает коллизию,
  * пока на её пути кто-то есть, — в это время дверь стоит и ждёт.</p>
  */
-public abstract class AbstractDoorBlockEntity extends BlockEntity {
+public abstract class AbstractDoorBlockEntity extends DoorBlockEntityBase {
     /** Доля хода створки, начиная с которой проём проходим. */
     protected static final float PASSABLE_FROM = 0.5F;
 
@@ -226,7 +223,7 @@ public abstract class AbstractDoorBlockEntity extends BlockEntity {
     }
 
     @Override
-    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 }

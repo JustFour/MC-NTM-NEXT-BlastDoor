@@ -92,18 +92,38 @@ O R O           I R I            P O P        O — обсидиан, R — ре
 Взрывостойкость (450) такая же, как у дюкретовых кирпичей NTM, и выше, чем у бетонных
 кирпичей (96). Ядерные взрывы NTM считают её по тому же числу.
 
+## Вариант для Traincraft (jar с пометкой `-TC`)
+
+У мода две сборки. В обычной рельсовые двери стоят на ванильном рельсе: поезда
+[Traincraft](https://github.com/matisiekpl/traincraft) по нему ездят, но в проёме виден ванильный
+рельс, а поезд, врезавшийся в закрытую дверь, разбивается.
+
+**Сборка `-TC`** сделана под путь Traincraft и требует Traincraft 0.0.5 или новее:
+
+- Рельсовый блок обеих рельсовых дверей — настоящий путь Traincraft, его рисует сам Traincraft.
+  Дверь ставится в разрыв в один блок между двумя кусками пути Traincraft.
+- Поезда, идущие к закрытой двери, тормозят за 16 блоков до неё, как перед красным сигналом,
+  и встают в блоке от створки, а не разбиваются.
+- Ванильные вагонетки по таким дверям не ездят. Гермозатвор в обеих сборках одинаковый.
+
+В одном мире используйте одну сборку: не меняйте её, если рельсовые двери уже поставлены.
+
 ## Сборка и запуск
 
 Нужен **JDK 25** (Mojang поставляет Java 25 для 26.2).
 
 ```bash
 ./gradlew runClient     # запустить игру с модом
-./gradlew build         # собрать jar → build/libs/blastdoor-1.7.5.jar
+./gradlew build         # собрать обычный jar → build/libs/blastdoor-1.8.1.jar
+./gradlew build -Ptc    # собрать вариант для Traincraft → build/libs/blastdoor-1.8.1-TC.jar
 ```
 
 На Windows — `gradlew.bat`. Готовый jar кладётся в папку `mods` клиента с NeoForge 26.2.
 Версии задаются в `gradle.properties` (`neo_version=26.2.0.90`); свежую версию можно взять на
 https://projects.neoforged.net/neoforged/neoforge.
+
+Вариант для Traincraft компилируется с самим Traincraft, которого нет ни в составе мода, ни в открытых
+репозиториях: сначала положите его jar в `libs/tc.jar` (путь задаёт `tc_jar` в `gradle.properties`).
 
 ## Устройство кода
 
@@ -115,8 +135,10 @@ https://projects.neoforged.net/neoforged/neoforge.
 | `compat/NtmCompat.java` | Совместимость с NTM NEXT: закрытые двери регистрируются как защита от радиации |
 | `client/BoxMesh.java` | Построитель текстурированных коробок, из них нарисованы все створки |
 | `client/DoorRumbleSound.java` | Глухой гул, который клиент проигрывает, пока створка движется |
-| `block/AbstractRailDoorBlock.java` | Общее для двух рельсовых дверей: контроллер — прямой рельс (`BaseRailBlock`), установка, коллизия, редстоун |
-| `blockentity/AbstractRailDoorBlockEntity.java` | Общее для двух рельсовых дверей: остановка вагонеток, выравнивание формы рельса |
+| `block/AbstractRailDoorBlock.java` | Общее для двух рельсовых дверей: блок-контроллер, установка, коллизия, редстоун. Две версии: ванильный рельс в `src/vanilla`, путь Traincraft в `src/tc` |
+| `blockentity/AbstractRailDoorBlockEntity.java` | Общее для двух рельсовых дверей: остановка вагонеток (`src/vanilla`) или торможение поездов Traincraft (`src/tc`) |
+| `blockentity/DoorBlockEntityBase.java` | Основа блок-сущности каждой двери; в `src/tc` это блок-сущность пути Traincraft |
+| `client/RailTrackVisual.java` | Рисует рельс под дверью: в `src/vanilla` ничего, в `src/tc` — путь Traincraft |
 | **Откатная гермодверь** | |
 | `block/BlastDoorBlock.java` | Контроллер: рельс и список 8 частей вокруг него |
 | `block/BlastDoorPartBlock.java` | Невидимые части 3×3: коллизия, приём сигнала, разрушение всей структуры |

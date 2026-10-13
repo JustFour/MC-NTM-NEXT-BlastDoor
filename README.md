@@ -92,18 +92,38 @@ the mod works as usual: the dependency is optional and is not bundled into the j
 The blast resistance (450) equals that of NTM ducrete bricks and is higher than that of concrete
 bricks (96). NTM nuclear explosions use the same number.
 
+## Traincraft variant (the `-TC` jar)
+
+There are two builds of the mod. In the regular one the rail doors sit on a vanilla rail;
+[Traincraft](https://github.com/matisiekpl/traincraft) trains can ride it, but the doorway shows a
+vanilla rail and a train that rams a closed door is wrecked.
+
+The **`-TC` build** is made for Traincraft track and needs Traincraft 0.0.5 or newer:
+
+- The rail block of both rail doors is real Traincraft track, drawn by Traincraft itself.
+  Place the door into a one-block gap between two pieces of Traincraft track.
+- Trains heading for a closed door brake within 16 blocks of it, like at a red signal, and stop one
+  block short of the leaf instead of crashing.
+- Vanilla minecarts cannot ride these doors. The station gates are the same in both builds.
+
+Use one build per world: do not switch builds on a world that already has rail doors.
+
 ## Building and running
 
 You need **JDK 25** (Mojang ships Java 25 with 26.2).
 
 ```bash
 ./gradlew runClient     # start the game with the mod
-./gradlew build         # build the jar → build/libs/blastdoor-1.7.5.jar
+./gradlew build         # build the regular jar → build/libs/blastdoor-1.8.1.jar
+./gradlew build -Ptc    # build the Traincraft variant → build/libs/blastdoor-1.8.1-TC.jar
 ```
 
 On Windows use `gradlew.bat`. Put the built jar into the `mods` folder of a NeoForge 26.2 client.
 Versions are set in `gradle.properties` (`neo_version=26.2.0.90`); newer NeoForge builds are listed at
 https://projects.neoforged.net/neoforged/neoforge.
+
+The Traincraft variant is compiled against Traincraft itself, which is not bundled and not in any
+public repository: put its jar at `libs/tc.jar` first (the path is `tc_jar` in `gradle.properties`).
 
 ## Code layout
 
@@ -115,8 +135,10 @@ https://projects.neoforged.net/neoforged/neoforge.
 | `compat/NtmCompat.java` | NTM NEXT compatibility: registers closed doors as radiation shielding |
 | `client/BoxMesh.java` | Builds textured boxes; all leaves are drawn from them |
 | `client/DoorRumbleSound.java` | The low rumble that plays on the client while a leaf moves |
-| `block/AbstractRailDoorBlock.java` | Shared by the two rail doors: a straight rail (`BaseRailBlock`) as controller, placement, collision, redstone |
-| `blockentity/AbstractRailDoorBlockEntity.java` | Shared by the two rail doors: stopping minecarts, keeping the rail shape aligned |
+| `block/AbstractRailDoorBlock.java` | Shared by the two rail doors: the controller block, placement, collision, redstone. Two versions: a vanilla rail in `src/vanilla`, Traincraft track in `src/tc` |
+| `blockentity/AbstractRailDoorBlockEntity.java` | Shared by the two rail doors: stopping minecarts (`src/vanilla`) or braking Traincraft trains (`src/tc`) |
+| `blockentity/DoorBlockEntityBase.java` | Base of every door's block entity; in `src/tc` it is Traincraft's track block entity |
+| `client/RailTrackVisual.java` | Draws the rail under a door: nothing in `src/vanilla`, Traincraft's track in `src/tc` |
 | **Railway Slide Blast Door** | |
 | `block/BlastDoorBlock.java` | Controller: the rail plus the list of the 8 parts around it |
 | `block/BlastDoorPartBlock.java` | Invisible parts of the 3×3 frame: collision, redstone input, removal of the whole structure |

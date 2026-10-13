@@ -45,3 +45,6 @@ repo/
 
 ### Logs written when game classes run outside the game ###
 logs/
+
+### Third-party mod jars used only to compile optional build variants ###
+libs/

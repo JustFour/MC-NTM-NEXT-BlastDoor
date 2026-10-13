@@ -35,7 +35,8 @@ import org.jspecify.annotations.Nullable;
  * <p>Всё, что есть на плите, умещается в её толщину, а площадка и перила при опускании складываются
  * вплотную к ней — поэтому лежащая плита оказывается вровень с полом.</p>
  *
- * <p>Текстура {@code textures/entity/station_gate.png} 256x256, 32 текселя на блок: настил (верх лежащей
+ * <p>Текстура {@code textures/entity/station_gate.png} 512x512, 64 пикселя на блок;
+ * координаты ниже — в сетке 256x256 (32 единицы на блок), UV нормированы: настил (верх лежащей
  * плиты) — (0,0)-(128,128), изнанка — (0,128)-(128,256), образцы материалов 32x32 — от (128,0),
  * предупреждающая полоса — (128,64)-(256,80), полки балок с заклёпками — (128,84) и (128,96),
  * оборудование приямка — от (144,96).</p>
@@ -45,7 +46,7 @@ public class StationGateRenderer implements BlockEntityRenderer<StationGateBlock
             Identifier.fromNamespaceAndPath(BlastDoorMod.MODID, "textures/entity/station_gate.png");
 
     private static final float TEX = 256.0F;
-    /** Текселей на блок: области текстуры для балок и решётки берутся по их размеру. */
+    /** Единиц сетки {@link #TEX} на блок: области текстуры для балок и решётки берутся по их размеру. */
     private static final float TEXELS = 32.0F;
 
     // Области текстуры в пикселях: u0, v0, u1, v1

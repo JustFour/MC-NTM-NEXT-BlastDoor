@@ -26,7 +26,8 @@ import org.jspecify.annotations.Nullable;
  * +Z — вдоль пути (куда смотрел игрок), +X — поперёк пути, влево от игрока.
  * Створка занимает x ∈ [-1.5; 1.5], y ∈ [0; 3] и при открытии уезжает на 3 блока вдоль X.</p>
  *
- * <p>Текстура {@code textures/entity/blast_door.png} 256x256, 32 текселя на блок: лицевая сторона
+ * <p>Текстура {@code textures/entity/blast_door.png} 512x512, 64 пикселя на блок;
+ * координаты ниже — в сетке 256x256 (32 единицы на блок), UV нормированы: лицевая сторона
  * створки — (0,0)-(96,92), предупреждающая полоса — (0,96)-(88,104), полки рамы с заклёпками —
  * (0,108)-(96,112) и (100,0)-(104,96), образцы материалов 32x32 — от (128,0).</p>
  */
@@ -57,17 +58,25 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
     /** На сколько градусов поворачивается штурвал, пока отходят ригели. */
     private static final float WHEEL_TURN = 270.0F;
 
-    public BlastDoorRenderer(BlockEntityRendererProvider.Context context) {}
+    /** Рельс под дверью: в обычной сборке пусто, в сборке под Traincraft — его путь. */
+    private final RailTrackVisual track;
+
+    public BlastDoorRenderer(BlockEntityRendererProvider.Context context) {
+        this.track = new RailTrackVisual(context);
+    }
 
     @Override
     public BlastDoorRenderState createRenderState() {
-        return new BlastDoorRenderState();
+        BlastDoorRenderState state = new BlastDoorRenderState();
+        state.track = track.createState();
+        return state;
     }
 
     @Override
     public void extractRenderState(BlastDoorBlockEntity be, BlastDoorRenderState state, float partialTick,
                                    Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
         BlockEntityRenderer.super.extractRenderState(be, state, partialTick, cameraPos, crumblingOverlay);
+        track.extract(be, state.track, partialTick, cameraPos, crumblingOverlay);
         state.facing = be.getBlockState().getValue(BlastDoorBlock.FACING);
         state.mirrored = be.getBlockState().getValue(BlastDoorBlock.MIRRORED);
         state.progress = be.getRenderProgress(partialTick);
@@ -78,6 +87,7 @@ public class BlastDoorRenderer implements BlockEntityRenderer<BlastDoorBlockEnti
     @Override
     public void submit(BlastDoorRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
         final float dir = state.mirrored ? -1.0F : 1.0F;          // куда откатывается створка
+        track.submit(state.track, poseStack, collector, camera);
         final float p = state.progress;
         final float eased = p * p * (3.0F - 2.0F * p);            // плавный разгон и торможение
         final float slide = dir * 3.0F * eased;

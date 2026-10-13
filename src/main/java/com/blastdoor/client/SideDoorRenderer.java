@@ -38,8 +38,8 @@ import org.jspecify.annotations.Nullable;
  * за проушину у свободной кромки: дверь закрыта — шток выдвинут, открыта — убран.
  * За габарит в один блок выходят только ригели запертой двери.</p>
  *
- * <p>Текстура {@code textures/entity/side_blast_door.png} 256x256, 32 текселя на блок (вдвое плотнее,
- * чем у остальных дверей): сторона A — (0,0)-(96,92), сторона B — (0,96)-(96,188), торец свободной
+ * <p>Текстура {@code textures/entity/side_blast_door.png} 512x512, 64 пикселя на блок;
+ * координаты ниже — в сетке 256x256 (32 единицы на блок), UV нормированы: сторона A — (0,0)-(96,92), сторона B — (0,96)-(96,188), торец свободной
  * кромки — (96,0)-(112,92), полки стоек — (112,0)-(118,96), полки поясов — (0,192) и (0,200),
  * образцы материалов 32x32 — от (128,0).</p>
  */
@@ -48,7 +48,7 @@ public class SideDoorRenderer implements BlockEntityRenderer<SideDoorBlockEntity
             Identifier.fromNamespaceAndPath(BlastDoorMod.MODID, "textures/entity/side_blast_door.png");
 
     private static final float TEX = 256.0F;
-    /** Текселей на блок: области текстуры для деталей рамы берутся по их длине. */
+    /** Единиц сетки {@link #TEX} на блок: области текстуры для деталей рамы берутся по их длине. */
     private static final float TEXELS = 32.0F;
 
     // Области текстуры в текселях: u0, v0, u1, v1
@@ -87,17 +87,25 @@ public class SideDoorRenderer implements BlockEntityRenderer<SideDoorBlockEntity
     private static final float DRIVE_MOUNT = 2.65F;
     private static final float BARREL_LENGTH = 1.68F;
 
-    public SideDoorRenderer(BlockEntityRendererProvider.Context context) {}
+    /** Рельс под дверью: в обычной сборке пусто, в сборке под Traincraft — его путь. */
+    private final RailTrackVisual track;
+
+    public SideDoorRenderer(BlockEntityRendererProvider.Context context) {
+        this.track = new RailTrackVisual(context);
+    }
 
     @Override
     public SideDoorRenderState createRenderState() {
-        return new SideDoorRenderState();
+        SideDoorRenderState state = new SideDoorRenderState();
+        state.track = track.createState();
+        return state;
     }
 
     @Override
     public void extractRenderState(SideDoorBlockEntity be, SideDoorRenderState state, float partialTick,
                                    Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
         BlockEntityRenderer.super.extractRenderState(be, state, partialTick, cameraPos, crumblingOverlay);
+        track.extract(be, state.track, partialTick, cameraPos, crumblingOverlay);
         state.facing = be.getBlockState().getValue(SideDoorBlock.FACING);
         state.mirrored = be.getBlockState().getValue(SideDoorBlock.MIRRORED);
         state.progress = be.getRenderProgress(partialTick);
@@ -108,6 +116,7 @@ public class SideDoorRenderer implements BlockEntityRenderer<SideDoorBlockEntity
     @Override
     public void submit(SideDoorRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera) {
         final int side = state.mirrored ? -1 : 1;                  // с какой стороны карман
+        track.submit(state.track, poseStack, collector, camera);
         final float p = state.progress;
         final float eased = p * p * (3.0F - 2.0F * p);            // плавный разгон и торможение
         final float angle = 90.0F * eased;                        // 0 — в проёме, 90 — в кармане
