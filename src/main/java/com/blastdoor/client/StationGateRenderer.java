@@ -35,28 +35,38 @@ import org.jspecify.annotations.Nullable;
  * <p>Всё, что есть на плите, умещается в её толщину, а площадка и перила при опускании складываются
  * вплотную к ней — поэтому лежащая плита оказывается вровень с полом.</p>
  *
- * <p>Текстура {@code textures/entity/station_gate.png} 128x128: настил (верх лежащей плиты) —
- * (0,0)-(64,64), изнанка — (0,64)-(64,128), образцы материалов 16x16 — столбцы 64..80 и 80..96,
- * полки балок с заклёпками — (96,0)-(99,64) и (64,76)-(128,79), предупреждающая полоса — (64,64)-(128,72).</p>
+ * <p>Текстура {@code textures/entity/station_gate.png} 256x256, 32 текселя на блок: настил (верх лежащей
+ * плиты) — (0,0)-(128,128), изнанка — (0,128)-(128,256), образцы материалов 32x32 — от (128,0),
+ * предупреждающая полоса — (128,64)-(256,80), полки балок с заклёпками — (128,84) и (128,96),
+ * оборудование приямка — от (144,96).</p>
  */
 public class StationGateRenderer implements BlockEntityRenderer<StationGateBlockEntity, StationGateRenderState> {
     public static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(BlastDoorMod.MODID, "textures/entity/station_gate.png");
 
-    private static final float TEX = 128.0F;
+    private static final float TEX = 256.0F;
+    /** Текселей на блок: области текстуры для балок и решётки берутся по их размеру. */
+    private static final float TEXELS = 32.0F;
 
     // Области текстуры в пикселях: u0, v0, u1, v1
-    private static final float[] DECK = {0, 0, 64, 64};
-    private static final float[] UNDERSIDE = {0, 64, 64, 128};
-    private static final float[] PAINT = {64, 0, 80, 16};
-    private static final float[] STEEL = {64, 16, 80, 32};
-    private static final float[] PIT = {64, 32, 80, 48};
-    private static final float[] CHROME = {64, 48, 80, 64};
-    private static final float[] GRATE = {80, 0, 96, 16};
-    private static final float[] DARK = {80, 16, 96, 32};
-    private static final float[] LAMP_OFF = {80, 32, 96, 48};
-    private static final float[] LAMP_ON = {80, 48, 96, 64};
-    private static final float[] HAZARD = {64, 64, 128, 72};
+    private static final float[] DECK = {0, 0, 128, 128};
+    private static final float[] UNDERSIDE = {0, 128, 128, 256};
+    private static final float[] PAINT = {128, 0, 160, 32};
+    private static final float[] STEEL = {160, 0, 192, 32};
+    private static final float[] PIT = {192, 0, 224, 32};
+    private static final float[] CHROME = {224, 0, 256, 32};
+    private static final float[] GRATE = {128, 32, 160, 64};
+    private static final float[] DARK = {160, 32, 192, 64};
+    private static final float[] LAMP_OFF = {192, 32, 224, 64};
+    private static final float[] LAMP_ON = {224, 32, 256, 64};
+    private static final float[] HAZARD = {128, 64, 256, 80};
+    // Оборудование приямка
+    private static final float[] PIPE = {144, 96, 176, 128};      // труба, блик вдоль V
+    private static final float[] PIPE_T = {176, 96, 208, 128};    // труба, блик вдоль U
+    private static final float[] TANK = {208, 96, 240, 128};
+    private static final float[] CABINET = {144, 128, 176, 160};
+    private static final float[] RED = {176, 128, 208, 160};
+    private static final float[] GAUGE = {208, 128, 240, 160};
 
     private static final float P = 1.0F / 16.0F; // один пиксель в блоках
 
@@ -173,6 +183,65 @@ public class StationGateRenderer implements BlockEntityRenderer<StationGateBlock
             m.box(lx - 2 * P, PIT_FLOOR, 1.0F - 2 * P, lx + 2 * P, 2.5F * P, 1.0F + 2 * P, DARK, DARK);
             glow.box(lx - 1.5F * P, 2.5F * P, 1.0F - 1.5F * P, lx + 1.5F * P, 5 * P, 1.0F + 1.5F * P, lamp, lamp);
         }
+
+        drawPitEquipment(m);
+    }
+
+    /**
+     * Оборудование приямка: опоры петель, гидравлические трубы с вентилями, насосная станция и шкаф
+     * управления. Всё стоит там, где у лежащей плиты пустоты: в каналах цилиндров, под рёбрами средней
+     * части (не выше 5 px от дна) и в углах за скосами рамы.
+     */
+    private static void drawPitEquipment(BoxMesh m) {
+        final float pipeTop = 3.75F * P;
+
+        for (int i = 0; i < CYLINDER_X.length; i++) {
+            final float cx = CYLINDER_X[i];
+            final float inward = i == 0 ? 1.0F : -1.0F;           // в сторону середины затвора
+
+            // Опора петли у ближнего края
+            m.box(cx - 3 * P, PIT_FLOOR, -0.48F, cx + 3 * P, 7 * P, -0.2F, DARK, DARK);
+            m.box(cx - 1.5F * P, 7 * P, -0.42F, cx + 1.5F * P, 8 * P, -0.26F, STEEL, STEEL);
+
+            // Напорная труба под цилиндром, с фланцами
+            pipeAlongZ(m, cx - 0.75F * P, PIT_FLOOR, 0.65F, cx + 0.75F * P, 3.5F * P, 2.7F);
+            for (float z : new float[]{0.7F, 1.5F, 2.2F, 2.7F}) {
+                m.box(cx - P, PIT_FLOOR, z - 0.5F * P, cx + P, pipeTop, z + 0.5F * P, STEEL, STEEL);
+            }
+            // Тонкая сливная линия вдоль главной балки
+            final float drain = cx + inward * 4.375F * P;
+            m.box(drain - 0.4F * P, PIT_FLOOR, 0.0F, drain + 0.4F * P, 2.8F * P, 2.7F, STEEL, DARK);
+        }
+
+        // Средняя часть: две магистрали вдоль приямка и коллектор с вентилями между ними
+        final float headerZ = 1.75F;
+        final float[] mains = {-0.27F, 1.27F};
+        for (float x : mains) {
+            pipeAlongZ(m, x - 0.875F * P, PIT_FLOOR, -0.05F, x + 0.875F * P, pipeTop, headerZ);
+            m.box(x - 1.1F * P, PIT_FLOOR, -0.05F - 0.5F * P, x + 1.1F * P, 4 * P, -0.05F + 0.5F * P, STEEL, STEEL);
+            m.box(x - 1.1F * P, PIT_FLOOR, headerZ - 1.1F * P, x + 1.1F * P, 4 * P, headerZ + 1.1F * P, STEEL, STEEL);
+        }
+        pipeAlongX(m, mains[0], PIT_FLOOR, headerZ - 0.875F * P, mains[1], pipeTop, headerZ + 0.875F * P);
+        for (float x : new float[]{0.25F, 0.75F}) {
+            m.box(x - P, PIT_FLOOR, headerZ - P, x + P, 4.25F * P, headerZ + P, STEEL, STEEL);
+            m.box(x - 1.5F * P, 4.25F * P, headerZ - 1.5F * P, x + 1.5F * P, 4.75F * P, headerZ + 1.5F * P, RED, RED);
+        }
+
+        // Дальние углы за скосами рамы: насосная станция с манометром слева, шкаф управления справа
+        m.box(-1.47F, PIT_FLOOR, 3.1F, -1.2F, 10 * P, 3.47F, TANK, TANK);
+        m.box(-1.44F, 10 * P, 3.14F, -1.23F, 12.5F * P, 3.43F, STEEL, DARK);
+        m.box(-1.4F, 5.5F * P, 3.08F, -1.27F, 7.5F * P, 3.1F, DARK, GAUGE);
+        m.box(2.2F, PIT_FLOOR, 3.1F, 2.47F, 12.5F * P, 3.47F, STEEL, CABINET);
+    }
+
+    /** Труба вдоль Z: блик идёт по её длине на всех видимых гранях, торцы тёмные. */
+    private static void pipeAlongZ(BoxMesh m, float x0, float y0, float z0, float x1, float y1, float z1) {
+        m.box(x0, y0, z0, x1, y1, z1, DARK, DARK, PIPE_T, PIPE_T, PIPE, PIPE);
+    }
+
+    /** Труба вдоль X. */
+    private static void pipeAlongX(BoxMesh m, float x0, float y0, float z0, float x1, float y1, float z1) {
+        m.box(x0, y0, z0, x1, y1, z1, PIPE_T, PIPE_T, DARK, DARK, PIPE_T, PIPE_T);
     }
 
     // ---------------------------------------------------------------- гидроцилиндры
@@ -277,12 +346,12 @@ public class StationGateRenderer implements BlockEntityRenderer<StationGateBlock
 
     /** Наружная полка вертикальной балки с рядом заклёпок, по длине балки. */
     private static float[] verticalFlange(float length) {
-        return new float[]{96, 0, 99, length * 16};
+        return new float[]{128, 96, 134, 96 + length * TEXELS};
     }
 
     /** Наружная полка горизонтальной балки с рядом заклёпок, по длине балки. */
     private static float[] horizontalFlange(float length) {
-        return new float[]{64, 76, 64 + length * 16, 79};
+        return new float[]{128, 84, 128 + length * TEXELS, 90};
     }
 
     // ---------------------------------------------------------------- складная площадка
@@ -300,7 +369,7 @@ public class StationGateRenderer implements BlockEntityRenderer<StationGateBlock
         BoxMesh platform = m.translated(0.0F, PLATFORM_ALONG, PLATFORM_DEPTH).rotatedX(-angle);
         final float segment = (PLATFORM_X1 - PLATFORM_X0) / 4;
         // Кусок решётки по размеру секции, чтобы ячейки были в масштабе остальных текстур.
-        final float[] grate = {GRATE[0], GRATE[1], GRATE[0] + segment * 16, GRATE[1] + PLATFORM_WIDTH * 16};
+        final float[] grate = {GRATE[0], GRATE[1], GRATE[0] + segment * TEXELS, GRATE[1] + PLATFORM_WIDTH * TEXELS};
         for (int i = 0; i < 4; i++) {
             float x = PLATFORM_X0 + i * segment;
             platform.box(x, -P, 0.0F, x + segment, 0.0F, PLATFORM_WIDTH, grate, STEEL);

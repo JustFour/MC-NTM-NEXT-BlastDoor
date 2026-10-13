@@ -57,7 +57,8 @@ it rises in about 10 seconds and seals a 4×4 opening.
 
 The slab becomes a solid floor only once it has fully lain down; until then, and while the gates are
 closed, there is a pit in its place. Whatever is in the pit when the slab comes down ends up on top
-of it. The hydraulic cylinders, a folding service platform and the warning lamps in the pit are animated.
+of it. The pit holds a pump station, a control cabinet and hydraulic piping; the hydraulic cylinders,
+a folding service platform and the warning lamps are animated.
 
 ## Crafting
 
@@ -97,7 +98,7 @@ You need **JDK 25** (Mojang ships Java 25 with 26.2).
 
 ```bash
 ./gradlew runClient     # start the game with the mod
-./gradlew build         # build the jar → build/libs/blastdoor-1.7.4.jar
+./gradlew build         # build the jar → build/libs/blastdoor-1.7.5.jar
 ```
 
 On Windows use `gradlew.bat`. Put the built jar into the `mods` folder of a NeoForge 26.2 client.
