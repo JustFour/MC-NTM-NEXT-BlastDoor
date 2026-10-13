@@ -1,89 +1,94 @@
-# Гермодверь (Blast Door) — мод для Minecraft 26.2 / NeoForge
+**English** | [Русский](README.ru.md)
 
-Откатная гермодверь 3×3 с рельсом в проёме, как в тоннеле метро: по сигналу редстоуна створка
-уезжает вбок на 3 блока, по снятию сигнала — возвращается и перекрывает путь вагонеткам.
+# Blast Door — a mod for Minecraft 26.2 / NeoForge
 
-## Как пользоваться в игре
+A 3×3 sliding blast door with a rail running through the opening, like the ones in metro tunnels.
+On a redstone signal the leaf slides 3 blocks sideways; when the signal is gone it slides back and
+blocks the track.
 
-1. Проложите рельсы и встаньте на путь **лицом вдоль рельсов**.
-2. Поставьте гермодверь — в игре блок называется «Blast Door» (вкладка «Механизмы») — **вместо рельса** в месте, где должна быть дверь.
-   Блок сам является прямым рельсом и занимает нижний центр проёма; остальные 8 блоков 3×3
-   ставятся автоматически. Место 3×3 поперёк пути должно быть свободно.
-3. Подайте сигнал редстоуна на **любой** из 9 блоков двери (рычаг на соседней стене, кнопка,
-   повторитель и т. п.). Есть сигнал — дверь открыта, нет сигнала — закрыта.
-4. **Shift при установке** — створка будет откатываться в другую сторону.
+## How to use it in game
 
-Поведение:
+1. Lay your rails and stand on the track **facing along the rails**.
+2. Place the Blast Door (Redstone Blocks tab) **in place of a rail** where the door should be.
+   The block is itself a straight rail and sits at the bottom centre of the opening; the other
+   8 blocks of the 3×3 frame are placed automatically. The 3×3 area across the track must be free.
+3. Power **any** of the door's 9 blocks with redstone (a lever on the wall next to it, a button,
+   a repeater and so on). Signal on — the door is open; signal off — it is closed.
+4. **Hold Shift while placing** to make the leaf slide the other way.
 
-- Ход створки — 2,5 секунды, с плавным разгоном/торможением, звуками и анимацией ригелей.
-- Проезд открывается только когда створка **полностью** откатилась.
-- Закрывается дверь только когда проём пуст: вагонетку, игрока или моба не прищемит — дверь подождёт.
-- Закрытая дверь останавливает вагонетки (коллизия + серверная страховка), мобы не строят путь сквозь неё.
-- Добывается киркой не хуже алмазной, вдвое твёрже обсидиана, взрывостойкость 450, поршни не сдвигают.
-- Сломали любой блок двери — разбирается вся структура, выпадает один предмет.
+Behaviour:
 
-Совет по постройке: створка уезжает в сторону, в «карман» 3×3 рядом с проёмом. Если там стена,
-дверь визуально уходит в неё, как в настоящем тоннеле. Направляющая в полу рисуется под проёмом и карманом.
+- The leaf takes 2.5 seconds to travel, with eased start and stop, sounds and animated locking bolts.
+- The opening becomes passable only when the leaf has slid away **completely**.
+- The door closes only when the doorway is empty: it waits instead of crushing a minecart, player or mob.
+- A closed door stops minecarts (collision plus a server-side safeguard), and mobs do not path through it.
+- It needs a diamond pickaxe or better, is twice as hard as obsidian, has a blast resistance of 450,
+  and cannot be pushed by pistons.
+- Breaking any block of the door dismantles the whole structure and drops a single item.
 
-## Крафт
+Building tip: the leaf slides sideways into a 3×3 "pocket" next to the opening. If there is a wall
+there, the door visually disappears into it, as in a real tunnel. The guide rail in the floor is
+drawn under both the opening and the pocket.
 
-С установленным NTM NEXT дверь собирается в **сборочной машине** (Assembly Machine), 200 тиков:
+## Crafting
 
-| Количество | Материал |
+With NTM NEXT installed, the door is built in the **Assembly Machine** (200 ticks):
+
+| Amount | Material |
 |---|---|
-| 16 | стальная пластина |
-| 6 | свинцовая пластина |
-| 4 | резина (любая) |
-| 8 | болт из быстрорежущей стали |
-| 2 | мотор |
-| 1 | рельс |
+| 16 | steel plate |
+| 6 | lead plate |
+| 4 | rubber (any kind) |
+| 8 | high-speed steel bolt |
+| 2 | motor |
+| 1 | rail |
 
-Без NTM NEXT работает запасной рецепт на обычном верстаке (с NTM он отключён):
+Without NTM NEXT a fallback crafting-table recipe applies (it is disabled when NTM is present):
 
 ```
-I I I    I — железный блок
-I P I    P — поршень
-O R O    O — обсидиан, R — рельс
+I I I    I — block of iron
+I P I    P — piston
+O R O    O — obsidian, R — rail
 ```
 
-## Совместимость с NTM NEXT
+## NTM NEXT compatibility
 
-Если установлен [NTM NEXT](https://github.com/Warfactory-Official/ntm-next) (mod id `hbm`), закрытая
-гермодверь не пропускает радиацию — так же, как двери самого NTM. Полностью открытая дверь радиацию
-пропускает. Без NTM мод работает как обычно: зависимость необязательная и в jar не попадает.
+With [NTM NEXT](https://github.com/Warfactory-Official/ntm-next) (mod id `hbm`) installed, a closed
+blast door blocks radiation, just like NTM's own doors. A fully open door lets radiation through.
+Without NTM the mod works as usual: the dependency is optional and is not bundled into the jar.
 
-Взрывостойкость двери (450) такая же, как у дюкретовых кирпичей NTM, и выше, чем у бетонных
-кирпичей (96). Ядерные взрывы NTM считают её по тому же числу.
+The door's blast resistance (450) equals that of NTM ducrete bricks and is higher than that of
+concrete bricks (96). NTM nuclear explosions use the same number.
 
-## Сборка и запуск
+## Building and running
 
-Нужен **JDK 25** (Mojang поставляет Java 25 для 26.2).
+You need **JDK 25** (Mojang ships Java 25 with 26.2).
 
 ```bash
-./gradlew runClient     # запустить игру с модом
-./gradlew build         # собрать jar → build/libs/blastdoor-1.1.0.jar
+./gradlew runClient     # start the game with the mod
+./gradlew build         # build the jar → build/libs/blastdoor-1.1.0.jar
 ```
 
-На Windows — `gradlew.bat`. Готовый jar кладётся в папку `mods` клиента с NeoForge 26.2.
-Версии задаются в `gradle.properties` (`neo_version=26.2.0.90`); свежую версию можно взять на
+On Windows use `gradlew.bat`. Put the built jar into the `mods` folder of a NeoForge 26.2 client.
+Versions are set in `gradle.properties` (`neo_version=26.2.0.90`); newer NeoForge builds are listed at
 https://projects.neoforged.net/neoforged/neoforge.
 
-## Устройство кода
+## Code layout
 
-| Файл | Что делает |
+| File | What it does |
 |---|---|
-| `BlastDoorMod.java` | Регистрация блоков, предмета, блок-сущности, вкладка творческого режима |
-| `block/BlastDoorBlock.java` | Контроллер: прямой рельс (`BaseRailBlock`) + коллизия закрытой двери + редстоун |
-| `block/BlastDoorPartBlock.java` | Невидимые части 3×3: коллизия, приём сигнала, разрушение всей структуры |
-| `block/DoorGeometry.java` | Координаты частей, формы коллизии, объём проёма |
-| `blockentity/BlastDoorBlockEntity.java` | Логика: прогресс анимации, открытие/закрытие, остановка вагонеток, звуки, синхронизация |
-| `item/BlastDoorItem.java` | Предмет двери: строка «Blast Resistance» во всплывающей подсказке |
-| `compat/NtmCompat.java` | Совместимость с NTM NEXT: закрытая дверь регистрируется как защита от радиации |
-| `client/BlastDoorRenderer.java` | Рисует створку (лист, рама, рёбра, штурвал, вентили, ригели, катки) и направляющую |
-| `assets/.../textures/entity/blast_door.png` | Текстура створки 64×64 (лицевая сторона + образцы материалов) |
+| `BlastDoorMod.java` | Registers the blocks, the item and the block entity; creative tab entry |
+| `block/BlastDoorBlock.java` | Controller: a straight rail (`BaseRailBlock`) plus the closed door's collision and redstone |
+| `block/BlastDoorPartBlock.java` | Invisible parts of the 3×3 frame: collision, redstone input, removal of the whole structure |
+| `block/DoorGeometry.java` | Part positions, collision shapes, doorway volume |
+| `blockentity/BlastDoorBlockEntity.java` | Logic: animation progress, opening and closing, stopping minecarts, sounds, sync |
+| `item/BlastDoorItem.java` | The door item: the "Blast Resistance" tooltip line |
+| `compat/NtmCompat.java` | NTM NEXT compatibility: registers the closed door as radiation shielding |
+| `client/BlastDoorRenderer.java` | Draws the leaf (sheet, frame, ribs, handwheel, valves, bolts, rollers) and the guide rail |
+| `assets/.../textures/entity/blast_door.png` | Leaf texture, 64×64 (front face plus material swatches) |
 
-Настройки, которые легко поменять:
+Things that are easy to tweak:
 
-- скорость — `BlastDoorBlockEntity.TRAVEL_TICKS`;
-- внешний вид — методы `drawLeaf`, `drawHandwheel`, `drawValve` в рендерере и текстура `blast_door.png`;
-- звуки — вызовы `playSound(...)` в блок-сущности.
+- speed — `BlastDoorBlockEntity.TRAVEL_TICKS`;
+- looks — the `drawLeaf`, `drawHandwheel` and `drawValve` methods in the renderer, and the `blast_door.png` texture;
+- sounds — the `playSound(...)` calls in the block entity.
